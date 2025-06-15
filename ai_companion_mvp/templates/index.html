@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Companion</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; background: #f0f0f0; }
+    #chat-box { max-width: 600px; margin: auto; background: white; padding: 1rem; border-radius: 8px; }
+    #messages { height: 300px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px; }
+    .user { text-align: right; color: #007bff; }
+    .ai { text-align: left; color: #444; }
+    input[type="text"] { width: 80%; padding: 0.5rem; }
+    button { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <div id="chat-box">
+    <h2>Talk to your AI Companion 💬</h2>
+    <div id="messages"></div>
+    <input type="text" id="input" placeholder="Say something..." />
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="playAudio()">🔊</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('input');
+      const msg = input.value;
+      if (!msg) return;
+      input.value = '';
+      appendMessage('user', msg);
+
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+      appendMessage('ai', data.text);
+      window.lastAudioUrl = data.audio;
+    }
+
+    function appendMessage(sender, msg) {
+      const box = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = sender;
+      div.innerText = msg;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function playAudio() {
+      if (window.lastAudioUrl) {
+        const audio = new Audio('/audio');
+        audio.play();
+      }
+    }
+  </script>
+</body>
+</html>
